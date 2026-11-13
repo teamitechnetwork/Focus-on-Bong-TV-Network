@@ -1,0 +1,446 @@
+# PROJECT: FOCUS ON BONG TV NETWORK — OFFICIAL WEBSITE
+
+I want you to design, develop, and launch a world-class, professional media and television broadcasting website for **FOCUS ON BONG TV NETWORK**.
+
+Official brand name: Focus on Bong TV Network
+
+Tagline: The Heartbeat of Bong County, Connecting the World.
+
+Brand identity: Inform. Educate. Entertain. Connect.
+
+I will upload the official company logo. Use the uploaded logo as the primary brand identity throughout the website. Do not redesign, distort, recolor, or replace the logo. Maintain its original proportions and quality.
+
+## 1. PROJECT VISION
+
+Build a modern, premium, visually impressive digital media platform that represents an established television and news broadcasting organization.
+
+The network will cover news and stories from Bong County, across Liberia, Africa, and around the world.
+
+The website must accommodate:
+- Breaking news and latest developments.
+- National and international news.
+- Politics and governance.
+- Business and economy.
+- Education and opportunities.
+- Sports.
+- Entertainment and lifestyle.
+- Culture and tourism.
+- Community development.
+- Investigative journalism.
+- Interviews and documentaries.
+- Video reports and live broadcasting.
+
+The website must communicate credibility, professionalism, authority, and trust.
+
+## 2. DESIGN AND BRANDING
+
+Create a premium television-network-inspired interface.
+
+Use the official brand colors:
+- Navy blue as the primary color.
+- White as the main background.
+- Red for breaking news, important announcements, and highlights.
+- Gold/yellow for accents and visual emphasis.
+
+Design requirements:
+- Modern, clean, sophisticated layout.
+- Professional editorial typography.
+- Beautiful news cards and content blocks.
+- High-quality images and thumbnails.
+- Elegant animations and transitions.
+- Consistent spacing and alignment.
+- Excellent visual hierarchy.
+- No cluttered layouts.
+- No generic template appearance.
+
+The website should look comparable in quality and presentation to established international media organizations.
+
+Create a distinctive visual identity that makes Focus on Bong TV Network recognizable.
+
+## 3. HOMEPAGE STRUCTURE
+
+Build an impressive homepage with the following sections.
+
+### A. Top Information Bar
+Include:
+- Current date.
+- Social media links.
+- Contact information.
+- Live TV indicator when broadcasting is actually available.
+
+### B. Main Navigation
+Include:
+- Official logo.
+- Home.
+- Latest News.
+- Liberia.
+- Africa.
+- World.
+- Politics.
+- Business.
+- Education.
+- Sports.
+- Entertainment.
+- Videos.
+- About Us.
+
+Include a prominent search function and mobile-friendly navigation.
+
+### C. Breaking News Section
+
+Create a professional breaking-news ticker.
+
+Allow administrators to publish urgent news announcements from the dashboard.
+
+Use a red visual indicator and scrolling headlines, with an option to disable animation for accessibility.
+
+### D. Hero News Section
+
+Create an impressive editorial hero section featuring:
+- One major featured story.
+- Large professional headline.
+- High-quality featured image.
+- Short article summary.
+- Publication date.
+- Author information.
+- Read More button.
+
+Include smaller supporting news stories beside or below the main feature.
+
+### E. Latest News
+
+Display the latest published articles in an attractive responsive grid.
+
+Each article card should include:
+- Featured image.
+- Category.
+- Headline.
+- Short description.
+- Publication date.
+- Author.
+- Read More link.
+
+### F. Trending and Most Read
+
+Create a section displaying popular and most-read stories.
+
+Track article views accurately and use actual engagement data rather than fabricated statistics.
+
+### G. News Categories
+
+Create dedicated sections for:
+
+1. Liberia News
+2. Bong County News
+3. Africa News
+4. World News
+5. Politics
+6. Business
+7. Education
+8. Sports
+9. Entertainment
+10. Culture and Lifestyle
+
+Each category should have its own archive page.
+
+### H. Video and Television Section
+
+This is an important part of the website.
+
+Build a professional video platform featuring:
+- Latest video reports.
+- News bulletins.
+- Interviews.
+- Documentaries.
+- Special reports.
+- Community stories.
+- Entertainment programs.
+
+Create an attractive video gallery with thumbnails, descriptions, and video playback.
+
+Support YouTube video embedding and externally hosted video links.
+
+### I. Focus on Bong TV Live
+
+Create a dedicated Live TV page.
+
+Design a professional television player interface with:
+- Large video player.
+- LIVE indicator when a genuine live stream is active.
+- Broadcast schedule.
+- Program information.
+- Upcoming broadcasts.
+- Alternative viewing links.
+
+Build the infrastructure to support an actual streaming source such as an HLS stream.
+
+Do not display a fake live broadcast or pretend the network is streaming when no stream is configured.
+
+Provide an attractive offline message when broadcasting is unavailable.
+
+### J. Newsletter Subscription
+
+Create a professional newsletter subscription section.
+
+Allow visitors to subscribe using their email addresses.
+
+Include proper email validation, duplicate prevention, consent, and an unsubscribe mechanism.
+
+Provide an administrator interface to manage subscribers.
+
+### K. Footer
+
+Create a comprehensive footer containing:
+- Official logo.
+- Short organizational description.
+- Navigation links.
+- News categories.
+- Contact information.
+- Social media links.
+- Privacy Policy.
+- Terms and Conditions.
+- Editorial Policy.
+- Copyright information.
+
+Use the tagline:
+
+The Heartbeat of Bong County, Connecting the World.
+
+## 4. INDIVIDUAL NEWS ARTICLE PAGES
+
+Every article must have a professional reading experience.
+
+Include:
+- Large headline.
+- Subtitle or summary.
+- Featured image.
+- Author name.
+- Publication date.
+- Last updated date.
+- Category.
+- Estimated reading time.
+- Article body.
+- Social sharing buttons.
+- Related articles.
+- Previous and next articles.
+- Comments, with moderation controls.
+
+Support image galleries and embedded videos inside articles.
+
+Implement proper article URLs using readable slugs.
+
+## 5. ADMINISTRATOR DASHBOARD
+
+Build a secure, professional content management dashboard.
+
+This is one of the most important requirements.
+
+Administrators must be able to:
+
+- Create articles.
+- Edit articles.
+- Delete articles.
+- Save drafts.
+- Schedule publications.
+- Publish and unpublish content.
+- Upload featured images.
+- Manage article categories.
+- Manage authors and contributors.
+- Manage breaking-news headlines.
+- Manage featured stories.
+- Manage videos.
+- Manage live-stream settings.
+- Manage newsletter subscribers.
+- Moderate comments.
+- Manage website pages.
+- Update social media links.
+- Manage homepage sections.
+
+Create different permission levels:
+- Super Administrator.
+- Editor.
+- Journalist/Author.
+
+Journalists should be able to submit articles, while editors can review and approve content before publication.
+
+Create a modern rich-text article editor with image uploads, headings, links, formatting, and video embedding.
+
+Include dashboard statistics based on real database information.
+
+## 6. SEARCH AND DISCOVERY
+
+Implement a powerful website search system.
+
+Visitors should be able to search:
+- News headlines.
+- Article content.
+- Categories.
+- Authors.
+- Videos.
+
+Include pagination and filtering.
+
+Create category archives, author profiles, and tag pages.
+
+## 7. SEO AND SEARCH ENGINE VISIBILITY
+
+Search engine optimization is extremely important.
+
+Implement:
+
+- SEO-friendly URLs.
+- Unique page titles.
+- Meta descriptions.
+- Canonical URLs.
+- XML sitemap.
+- Robots.txt.
+- Open Graph metadata.
+- Facebook sharing previews.
+- Twitter/X cards.
+- Article structured data.
+- NewsArticle schema where appropriate.
+- Organization schema.
+- Breadcrumb structured data.
+- Image alt text.
+- RSS feeds.
+
+Make every published article discoverable by search engines.
+
+Prepare the website for Google Search Console and Google News eligibility.
+
+Do not guarantee Google News approval; implement the appropriate technical and editorial foundations.
+
+## 8. SOCIAL MEDIA INTEGRATION
+
+Integrate social sharing for:
+- Facebook.
+- WhatsApp.
+- X.
+- LinkedIn.
+- Telegram.
+
+Create attractive social sharing previews using each article's headline and featured image.
+
+Include official social media profile links.
+
+## 9. MOBILE RESPONSIVENESS
+
+The website must be fully responsive.
+
+Test and optimize:
+- Desktop computers.
+- Laptops.
+- Tablets.
+- Android phones.
+- iPhones.
+
+Mobile experience is extremely important.
+
+Ensure:
+- Navigation works correctly.
+- Images resize properly.
+- Articles are easy to read.
+- Buttons are accessible.
+- No horizontal scrolling.
+- No overlapping elements.
+- Video players work correctly.
+- All homepage sections remain accessible.
+
+## 10. PERFORMANCE AND SECURITY
+
+Build the platform with performance and security in mind.
+
+Requirements:
+- Optimized images.
+- Lazy loading.
+- Efficient database queries.
+- Caching where appropriate.
+- Secure authentication.
+- Password hashing.
+- Role-based access control.
+- Input validation.
+- Protection against SQL injection.
+- Protection against cross-site scripting.
+- CSRF protection where applicable.
+- Secure file uploads.
+- Rate limiting for sensitive endpoints.
+- Secure environment variables.
+- Proper error handling.
+- Database backups and recovery considerations.
+
+Never expose API keys, passwords, database credentials, or private configuration files.
+
+## 11. TECHNICAL DEVELOPMENT
+
+First inspect the existing Replit project and determine the best architecture.
+
+Use a modern, maintainable, production-ready technology stack.
+
+If starting from scratch, choose a suitable framework, database, and backend architecture that Replit can run reliably and that can be deployed independently.
+
+Requirements:
+- Proper frontend/backend separation where appropriate.
+- Persistent database storage.
+- Reusable components.
+- Clean project structure.
+- Maintainable code.
+- Secure API endpoints.
+- Production environment configuration.
+- Database migrations.
+- Clear setup documentation.
+
+Do not use local browser storage as the primary database for articles, accounts, or subscribers.
+
+Do not create a frontend-only demonstration. All major features must actually work.
+
+## 12. IMPORTANT CONTENT REQUIREMENTS
+
+Do not populate the website with fabricated news reports, fake journalists, fake contact details, invented organizational achievements, or misleading statistics.
+
+Use clearly identified demonstration content only where necessary during development.
+
+Provide a way for administrators to replace demonstration content before launch.
+
+Create original sample headlines that are clearly marked as sample content, not real reporting.
+
+## 13. FINAL QUALITY REQUIREMENTS
+
+I want a complete, functioning website, not just a homepage design.
+
+Before considering the project complete:
+
+1. Test every navigation link.
+2. Test article creation and publication.
+3. Test editing and deleting articles.
+4. Test administrator authentication.
+5. Test user permissions.
+6. Test image uploads.
+7. Test video embedding.
+8. Test search.
+9. Test newsletter subscriptions.
+10. Test mobile responsiveness.
+11. Test SEO metadata.
+12. Test database persistence.
+13. Fix all errors and broken layouts.
+
+Do not remove or leave incomplete important functionality.
+
+Provide clear instructions for configuring the domain, database, environment variables, administrator account, email service, and live-stream URL.
+
+Make the project ready for production deployment.
+
+## 14. FINAL CREATIVE DIRECTION
+
+Think of Focus on Bong TV Network as an ambitious modern African media organization with national and international reach.
+
+The website should communicate:
+
+**FOCUS ON BONG TV NETWORK**
+
+*The Heartbeat of Bong County, Connecting the World.*
+
+**Inform. Educate. Entertain. Connect.**
+
+Build something exceptional, credible, modern, visually impressive, and ready to grow into a leading digital media and broadcasting platform.
+
+Take the time to implement the complete system properly. Do not sacrifice functionality for appearance.

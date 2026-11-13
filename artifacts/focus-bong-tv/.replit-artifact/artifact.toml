@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Focus on Bong TV Network"
+description = "An independent digital newsroom for Bong County, Liberia, Africa, and the world, with trusted reporting, video coverage, and a secure editorial publishing platform."
+version = "1.0.0"
+id = "artifacts/focus-bong-tv"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23096
+
+[services.development]
+run = "pnpm --filter @workspace/focus-bong-tv run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/focus-bong-tv", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/focus-bong-tv/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23096"
+BASE_PATH = "/"

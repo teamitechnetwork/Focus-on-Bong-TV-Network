@@ -3,13 +3,16 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Public editorial API for Focus on Bong TV Network
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: public-content
+  - name: discovery
+  - name: newsletter
+  - name: community
 paths:
   /healthz:
     get:
@@ -24,13 +27,530 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /articles:
+    get:
+      operationId: listArticles
+      tags: [public-content]
+      summary: Browse published articles
+      parameters:
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: author, schema: { type: string } }
+        - { in: query, name: tag, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+        - { in: query, name: pageSize, schema: { type: integer, minimum: 1, maximum: 30, default: 12 } }
+        - { in: query, name: sort, schema: { type: string, enum: [newest, popular], default: newest } }
+        - { in: query, name: featured, schema: { type: boolean } }
+      responses:
+        "200":
+          description: Published articles matching the filters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleList"
+  /articles/{slug}:
+    get:
+      operationId: getArticle
+      tags: [public-content]
+      summary: Read an article
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Published article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Article"
+        "404":
+          description: Article not found
+  /articles/{slug}/views:
+    post:
+      operationId: recordArticleView
+      tags: [public-content]
+      summary: Record a deduplicated reading session
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleViewInput"
+      responses:
+        "200":
+          description: Current article view count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArticleViewResult"
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [discovery]
+      summary: List news categories
+      responses:
+        "200":
+          description: Categories with published article counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+  /authors:
+    get:
+      operationId: listAuthors
+      tags: [discovery]
+      summary: List public author profiles
+      responses:
+        "200":
+          description: Authors with published article counts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Author"
+  /authors/{slug}:
+    get:
+      operationId: getAuthor
+      tags: [discovery]
+      summary: Read an author profile
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Author profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+  /videos:
+    get:
+      operationId: listVideos
+      tags: [public-content]
+      summary: Browse published videos
+      parameters:
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+        - { in: query, name: pageSize, schema: { type: integer, minimum: 1, maximum: 30, default: 12 } }
+      responses:
+        "200":
+          description: Published video list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoList"
+  /videos/{slug}:
+    get:
+      operationId: getVideo
+      tags: [public-content]
+      summary: Read a video page
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Published video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+        "404":
+          description: Video not found
+  /live:
+    get:
+      operationId: getLive
+      tags: [public-content]
+      summary: Get verified live broadcast status and schedule
+      responses:
+        "200":
+          description: Live page configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveConfiguration"
+  /breaking-news:
+    get:
+      operationId: listBreakingNews
+      tags: [public-content]
+      summary: List current breaking-news headlines
+      responses:
+        "200":
+          description: Active breaking-news headlines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BreakingNews"
+  /pages/{slug}:
+    get:
+      operationId: getPage
+      tags: [public-content]
+      summary: Read a public information page
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Published information page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentPage"
+        "404":
+          description: Page not found
+  /search:
+    get:
+      operationId: searchContent
+      tags: [discovery]
+      summary: Search published news and videos
+      parameters:
+        - { in: query, name: q, required: true, schema: { type: string, minLength: 2 } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        "200":
+          description: Matching articles and videos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+  /site-settings:
+    get:
+      operationId: getSiteSettings
+      tags: [public-content]
+      summary: Get public network contact and social details
+      responses:
+        "200":
+          description: Public site identity details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+  /newsletter/subscribe:
+    post:
+      operationId: subscribeNewsletter
+      tags: [newsletter]
+      summary: Subscribe with explicit consent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterSubscriptionInput"
+      responses:
+        "201":
+          description: Subscription recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsletterMessage"
+        "400":
+          description: Invalid email or missing consent
+  /newsletter/unsubscribe:
+    post:
+      operationId: unsubscribeNewsletter
+      tags: [newsletter]
+      summary: Unsubscribe an email address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewsletterUnsubscribeInput"
+      responses:
+        "200":
+          description: Generic unsubscribe confirmation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsletterMessage"
+  /articles/{slug}/comments:
+    get:
+      operationId: listArticleComments
+      tags: [community]
+      summary: List approved comments
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Approved comments for an article
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ArticleComment"
+    post:
+      operationId: submitArticleComment
+      tags: [community]
+      summary: Submit a comment for review
+      parameters:
+        - { in: path, name: slug, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArticleCommentInput"
+      responses:
+        "201":
+          description: Comment submitted for moderation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentSubmission"
+  /sitemap.xml:
+    get:
+      operationId: getSitemap
+      tags: [discovery]
+      summary: Get the public XML sitemap
+      responses:
+        "200":
+          description: XML sitemap
+          content:
+            application/xml:
+              schema:
+                type: string
+  /feed.xml:
+    get:
+      operationId: getRssFeed
+      tags: [discovery]
+      summary: Get the public RSS feed
+      responses:
+        "200":
+          description: RSS 2.0 feed
+          content:
+            application/rss+xml:
+              schema:
+                type: string
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
+    Article:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        excerpt: { type: string }
+        body: { type: string }
+        categorySlug: { type: string }
+        categoryName: { type: string }
+        tags: { type: array, items: { type: string } }
+        authorSlug: { type: string }
+        authorName: { type: string }
+        authorRole: { type: string }
+        authorBio: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        imageAlt: { type: string }
+        imageCredit: { type: ["string", "null"] }
+        gallery: { type: array, items: { $ref: "#/components/schemas/ArticleGalleryImage" } }
+        videoEmbed: { type: ["string", "null"] }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        updatedAt: { type: string, format: date-time }
+        readingMinutes: { type: integer }
+        viewCount: { type: integer }
+        featured: { type: boolean }
+        isDemo: { type: boolean }
+        relatedArticles: { type: array, items: { $ref: "#/components/schemas/ArticleSummary" } }
+        previousArticle: { anyOf: [{ $ref: "#/components/schemas/ArticleSummary" }, { type: "null" }] }
+        nextArticle: { anyOf: [{ $ref: "#/components/schemas/ArticleSummary" }, { type: "null" }] }
+      required: [id, slug, title, excerpt, body, categorySlug, categoryName, tags, authorSlug, authorName, authorRole, imageAlt, gallery, videoEmbed, updatedAt, readingMinutes, viewCount, featured, isDemo, relatedArticles, previousArticle, nextArticle]
+    ArticleSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        subtitle: { type: ["string", "null"] }
+        excerpt: { type: string }
+        categorySlug: { type: string }
+        categoryName: { type: string }
+        tags: { type: array, items: { type: string } }
+        authorSlug: { type: string }
+        authorName: { type: string }
+        authorRole: { type: string }
+        imageUrl: { type: ["string", "null"] }
+        imageAlt: { type: string }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        readingMinutes: { type: integer }
+        viewCount: { type: integer }
+        featured: { type: boolean }
+        isDemo: { type: boolean }
+      required: [id, slug, title, excerpt, categorySlug, categoryName, tags, authorSlug, authorName, authorRole, imageAlt, readingMinutes, viewCount, featured, isDemo]
+    ArticleGalleryImage:
+      type: object
+      properties:
+        url: { type: string }
+        alt: { type: string }
+        credit: { type: ["string", "null"] }
+      required: [url, alt]
+    ArticleList:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/ArticleSummary" } }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+      required: [items, total, page, pageSize]
+    ArticleViewInput:
+      type: object
+      properties:
+        sessionKey: { type: string, minLength: 16, maxLength: 80 }
+      required: [sessionKey]
+    ArticleViewResult:
+      type: object
+      properties:
+        viewCount: { type: integer }
+        counted: { type: boolean }
+      required: [viewCount, counted]
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        articleCount: { type: integer }
+      required: [id, slug, name, description, articleCount]
+    Author:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        role: { type: string }
+        bio: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        articleCount: { type: integer }
+        isDemo: { type: boolean }
+      required: [id, slug, name, role, articleCount, isDemo]
+    Video:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        title: { type: string }
+        description: { type: string }
+        category: { type: string }
+        sourceUrl: { type: string }
+        sourceType: { type: string, enum: [youtube, external, hls] }
+        thumbnailUrl: { type: ["string", "null"] }
+        duration: { type: ["string", "null"] }
+        publishedAt: { type: ["string", "null"], format: date-time }
+        isDemo: { type: boolean }
+      required: [id, slug, title, description, category, sourceUrl, sourceType, isDemo]
+    VideoList:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Video" } }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+      required: [items, total, page, pageSize]
+    LiveScheduleItem:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        startsAt: { type: string }
+        endsAt: { type: string }
+        isDemo: { type: boolean }
+      required: [title, description, startsAt, endsAt, isDemo]
+    LiveConfiguration:
+      type: object
+      properties:
+        isLive: { type: boolean }
+        streamUrl: { type: ["string", "null"] }
+        streamType: { type: ["string", "null"], enum: [hls, youtube, null] }
+        programTitle: { type: ["string", "null"] }
+        programDescription: { type: ["string", "null"] }
+        schedule: { type: array, items: { $ref: "#/components/schemas/LiveScheduleItem" } }
+        alternativeLinks: { type: array, items: { type: string } }
+      required: [isLive, schedule, alternativeLinks]
+    BreakingNews:
+      type: object
+      properties:
+        id: { type: integer }
+        headline: { type: string }
+        articleSlug: { type: ["string", "null"] }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: ["string", "null"], format: date-time }
+        isDemo: { type: boolean }
+      required: [id, headline, startsAt, isDemo]
+    ContentPage:
+      type: object
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        summary: { type: string }
+        body: { type: string }
+        updatedAt: { type: string, format: date-time }
+      required: [slug, title, summary, body, updatedAt]
+    SearchResults:
+      type: object
+      properties:
+        articles: { type: array, items: { $ref: "#/components/schemas/ArticleSummary" } }
+        videos: { type: array, items: { $ref: "#/components/schemas/Video" } }
+        total: { type: integer }
+        query: { type: string }
+      required: [articles, videos, total, query]
+    SocialLink:
+      type: object
+      properties:
+        label: { type: string }
+        url: { type: string }
+      required: [label, url]
+    SiteSettings:
+      type: object
+      properties:
+        organizationName: { type: string }
+        tagline: { type: string }
+        brandPromise: { type: string }
+        contactEmail: { type: ["string", "null"] }
+        contactPhone: { type: ["string", "null"] }
+        socialLinks: { type: array, items: { $ref: "#/components/schemas/SocialLink" } }
+      required: [organizationName, tagline, brandPromise, socialLinks]
+    NewsletterSubscriptionInput:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        consent: { type: boolean, const: true }
+      required: [email, consent]
+    NewsletterUnsubscribeInput:
+      type: object
+      properties:
+        email: { type: string, format: email }
+      required: [email]
+    NewsletterMessage:
+      type: object
+      properties:
+        message: { type: string }
+      required: [message]
+    ArticleComment:
+      type: object
+      properties:
+        id: { type: integer }
+        displayName: { type: string }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, displayName, body, createdAt]
+    ArticleCommentInput:
+      type: object
+      properties:
+        displayName: { type: string, minLength: 2, maxLength: 60 }
+        body: { type: string, minLength: 2, maxLength: 1500 }
+      required: [displayName, body]
+    CommentSubmission:
+      type: object
+      properties:
+        message: { type: string }
+      required: [message]
 
