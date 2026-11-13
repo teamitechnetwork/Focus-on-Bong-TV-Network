@@ -7,18 +7,20 @@ import {
   useListAuthors, useGetAuthor, useListVideos, useGetVideo, useGetLive,
   useListBreakingNews, useGetPage, useSearchContent, useGetSiteSettings,
   useSubscribeNewsletter, useUnsubscribeNewsletter, useListArticleComments,
-  useSubmitArticleComment, getListArticleCommentsQueryKey,
+  useSubmitArticleComment, getListArticleCommentsQueryKey, setBaseUrl,
 } from '@workspace/api-client-react';
 import type { ArticleSummary, Video, Author } from '@workspace/api-client-react';
 import NotFound from '@/pages/not-found';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import LatestLiberiaNews from '@/components/latest-liberia-news';
 
 const qc = new QueryClient();
 const brand = 'Focus on Bong TV Network';
 const tagline = 'The Heartbeat of Bong County, Connecting the World.';
 const origin = typeof window !== 'undefined' ? window.location.origin : '';
+setBaseUrl(import.meta.env.VITE_API_BASE_URL || null);
 
 function useMeta(title: string, description: string, canonical?: string, jsonLd?: object) {
   useEffect(() => {
@@ -46,7 +48,7 @@ function dateLabel(date?: string | null) {
   const parsed = new Date(date);
   return Number.isNaN(parsed.getTime()) ? 'Date not available' : new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(parsed);
 }
-function Demo({ demo }: { demo?: boolean }) { return demo ? <span className="inline-flex bg-[#f4c51b] px-2 py-1 text-[9px] font-extrabold tracking-[.16em] text-[#101f4a]" data-testid="label-demo">SAMPLE / DEMONSTRATION</span> : null; }
+function Demo(_props: { demo?: boolean }) { return null; }
 function AsyncState({ loading, error, children, label = 'content' }: { loading?: boolean; error?: boolean; children: ReactNode; label?: string }) {
   if (loading) return <div className="grid gap-4" aria-label="Loading"><div className="skeleton h-48"/><div className="skeleton h-8 w-2/3"/><div className="skeleton h-5 w-1/2"/></div>;
   if (error) return <div className="paper-card p-8 text-center" data-testid="status-error"><p className="serif text-2xl text-[#101f4a]">We couldn’t load this {label}.</p><p className="mt-2 text-sm text-stone-600">Please try again in a moment.</p></div>;
@@ -86,7 +88,7 @@ function Footer() {
       <div><p className="eyebrow !text-[#f4c51b]">Explore</p><div className="mt-4 grid grid-cols-2 gap-x-5 gap-y-3 text-sm">{[['Latest news','/latest-news'],['Videos','/videos'],['Live','/live'],['Authors','/authors'],['About','/about'],['Search','/search']].map(([l,h])=><Link className="text-white/80 hover:text-[#f4c51b]" href={h} key={h} data-testid={`footer-link-${h.replaceAll('/','') || 'home'}`}>{l}</Link>)}</div><div className="mt-7 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-white/55">{[['Privacy','/privacy-policy'],['Terms','/terms'],['Editorial policy','/editorial-policy']].map(([l,h])=><Link href={h} key={h} className="hover:text-white" data-testid={`footer-policy-${h.slice(1)}`}>{l}</Link>)}</div></div>
       <div><p className="eyebrow !text-[#f4c51b]">A note from the network</p><h3 className="serif mt-3 text-2xl">Stay in the conversation.</h3><p className="mt-2 text-xs leading-5 text-white/65">Register your interest in network updates. Email delivery is not configured yet.</p><form onSubmit={submit} className="mt-4 flex"><label className="sr-only" htmlFor="newsletter-email">Email address</label><input id="newsletter-email" type="email" required value={email} onChange={e=>setEmail(e.target.value)} placeholder="Your email address" className="min-w-0 flex-1 bg-white px-3 py-3 text-sm text-[#101f4a] outline-none" data-testid="input-newsletter-email"/><button disabled={subscribe.isPending} className="bg-[#f4c51b] px-4 text-xs font-extrabold text-[#101f4a] disabled:opacity-60" data-testid="button-newsletter">{subscribe.isPending ? 'Saving…' : 'SIGN UP'}</button></form>{message && <p className="mt-2 text-xs text-[#f4c51b]" role="status" data-testid="status-newsletter">{message}</p>}<p className="mt-3 text-[10px] text-white/45">By signing up, you consent to your email being recorded for this interest list.</p></div>
     </div>
-    <div className="border-t border-white/15"><div className="wrap flex flex-col justify-between gap-2 py-4 text-[10px] text-white/55 sm:flex-row"><span>© {new Date().getFullYear()} {settings?.organizationName || brand}</span><span>{settings?.contactEmail || 'Contact details will be added by the network.'}</span></div></div>
+    <div className="border-t border-white/15"><div className="wrap flex flex-col justify-between gap-2 py-4 text-[10px] text-white/55 sm:flex-row"><span>© {new Date().getFullYear()} {settings?.organizationName || brand}</span><span>{settings?.contactEmail}</span></div></div>
   </footer>;
 }
 
@@ -111,8 +113,8 @@ function Home() {
   const { data: cats } = useListCategories();
   const { data: videos } = useListVideos({ page: 1, pageSize: 3 });
   const { data: settings } = useGetSiteSettings();
-  const items = data?.items || [];
-  const lead = featured?.items?.[0] || items[0];
+  const items = data?.items?.filter((article) => !article.isDemo) || [];
+  const lead = featured?.items?.find((article) => !article.isDemo) || items[0];
   const rest = items.filter(x => x.id !== lead?.id).slice(0, 4);
   return <Shell><div className="wrap">
     <div className="flex items-center justify-between border-b border-[#e2ddd2] py-3 text-[10px] font-bold uppercase tracking-[.16em] text-[#6b6b65]"><span>Independent reporting · Bong County, Liberia</span><span className="hidden sm:block">Stories for our place in the world</span></div>
@@ -121,6 +123,7 @@ function Home() {
       <div className="flex flex-col gap-5">{rest.slice(0,3).map((a,i)=><Link key={a.id} href={`/article/${a.slug}`} className="group grid grid-cols-[104px_1fr] gap-4 border-b border-[#ded9cf] pb-4" data-testid={`link-home-story-${a.id}`}><div className="img-frame aspect-square">{a.imageUrl && <img src={a.imageUrl} alt={a.imageAlt} className="h-full w-full object-cover"/>}</div><div><span className="eyebrow">{a.categoryName}</span><h2 className="serif mt-1 text-xl font-semibold leading-tight text-[#101f4a] group-hover:text-[#c90018]">{a.title}</h2><p className="mt-2 text-[10px] text-stone-500">{dateLabel(a.publishedAt)} {a.isDemo && <span className="ml-1 font-bold text-[#9a7300]">· SAMPLE</span>}</p></div></Link>)}<Link href="/latest-news" className="mt-auto flex items-center justify-between bg-[#101f4a] p-4 text-white" data-testid="link-latest-brief"><span><span className="eyebrow !text-[#f4c51b]">Stay informed</span><span className="serif mt-1 block text-xl">All the latest reporting</span></span><ArrowUpRight size={20}/></Link></div>
     </section>
     {cats && cats.length > 0 && <section className="border-y border-[#ded9cf] py-5" data-testid="section-categories"><div className="flex flex-wrap items-center gap-x-5 gap-y-3"><span className="eyebrow mr-2">Browse by</span>{cats.map(c=><Link href={`/category/${c.slug}`} key={c.slug} className="text-xs font-bold text-[#101f4a] hover:text-[#c90018]" data-testid={`link-category-${c.slug}`}>{c.name}</Link>)}</div></section>}
+    <LatestLiberiaNews />
     <section className="py-11"><SectionTitle overline="From the newsroom" title="Latest reporting" href="/latest-news"/><AsyncState loading={isLoading} error={isError} label="articles">{items.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.slice(0,6).map(a=><ArticleCard key={a.id} article={a}/>)}</div> : <Empty title="No stories published yet" detail="New reporting will appear here when it is available."/>}</AsyncState></section>
     <section className="mb-12 grid items-center gap-5 bg-[#101f4a] p-6 text-white md:grid-cols-[1fr_auto] md:p-9"><div><span className="eyebrow !text-[#f4c51b]">Focus on Bong TV</span><h2 className="serif mt-2 text-3xl md:text-4xl">{settings?.tagline || tagline}</h2><p className="mt-2 max-w-xl text-sm leading-6 text-white/65">News and stories rooted in Bong County, with a view toward Liberia, Africa and the world.</p></div><Link className="btn !bg-[#f4c51b] !text-[#101f4a]" href="/about" data-testid="link-about-network">About the network <ArrowRight size={15}/></Link></section>
     <section className="pb-12"><SectionTitle overline="Watch" title="On Focus" href="/videos"/>{videos?.items?.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{videos.items.map(v=><VideoCard key={v.id} video={v}/>)}</div> : <Empty title="No videos available" detail="Published video coverage will appear here."/ >}</section>
@@ -180,9 +183,125 @@ function AuthorCard({author}:{author:Author}) {return <Link href={`/author/${aut
 
 function AuthorPage({slug}:{slug:string}) { const {data:author,isLoading,isError}=useGetAuthor(slug); const articles=useListArticles({author:slug,page:1,pageSize:12}); useMeta(author?.name || 'Author', author?.bio || 'Public author profile and published reporting.'); return <Shell><div className="wrap py-10"><AsyncState loading={isLoading} error={isError} label="author profile">{author ? <><div className="flex flex-col gap-5 border-b border-[#ded9cf] pb-8 sm:flex-row sm:items-center">{author.imageUrl?<img src={author.imageUrl} alt={author.name} className="h-28 w-28 rounded-full object-cover"/>:<div className="grid h-28 w-28 place-items-center rounded-full bg-[#101f4a] serif text-4xl text-[#f4c51b]">{author.name.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>}<div><div className="eyebrow">Contributor profile</div><Demo demo={author.isDemo}/><h1 className="serif mt-2 text-5xl text-[#101f4a]" data-testid="text-author-name">{author.name}</h1><p className="mt-2 text-sm font-semibold text-[#9b7500]">{author.role}</p>{author.bio&&<p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600">{author.bio}</p>}</div></div><section className="mt-9"><SectionTitle overline="Reporting" title="Articles by this author"/><AsyncState loading={articles.isLoading} error={articles.isError} label="author articles">{articles.data?.items?.length?<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{articles.data.items.map(a=><ArticleCard key={a.id} article={a}/>)}</div>:<Empty title="No published articles" detail="There is no currently published reporting for this profile."/ >}</AsyncState></section></>:<Empty title="Profile unavailable" detail="This author profile may not be public or may have moved."/ >}</AsyncState></div></Shell>; }
 
-function PageContent({slug}:{slug:string}) { const {data,isLoading,isError}=useGetPage(slug); useMeta(data?.title || slug.replaceAll('-',' '), data?.summary || 'Public information from Focus on Bong TV Network.'); return <Shell><div className="wrap max-w-[860px] py-10"><AsyncState loading={isLoading} error={isError} label="page">{data?<article data-testid="content-page"><div className="eyebrow">Network information</div><h1 className="serif mt-2 text-5xl text-[#101f4a]" data-testid="text-page-title">{data.title}</h1>{data.summary&&<p className="serif mt-4 border-l-4 border-[#f4c51b] pl-5 text-xl leading-relaxed text-stone-600">{data.summary}</p>}<div className="prose prose-lg mt-8 max-w-none prose-headings:font-serif prose-headings:text-[#101f4a] prose-p:leading-[1.8] prose-p:text-stone-700" data-testid="text-page-body">{data.body.split(/\n{2,}/).map((p,i)=><p key={i}>{p}</p>)}</div><p className="mt-8 border-t border-[#e5e0d6] pt-4 text-xs text-stone-500">Updated {dateLabel(data.updatedAt)}</p></article>:<Empty title="Information not available" detail="This page’s details will be added by the network."/ >}</AsyncState></div></Shell>; }
+function PageContent({ slug }: { slug: string }) {
+  const { data, isLoading, isError } = useGetPage(slug);
+  useMeta(data?.title || slug.replaceAll('-', ' '), data?.summary || 'Public information from Focus on Bong TV Network.');
+  return (
+    <Shell>
+      <div className="wrap max-w-[860px] py-10">
+        <AsyncState loading={isLoading} error={isError} label="page">
+          {data ? (
+            <article data-testid="content-page">
+              <div className="eyebrow">Network information</div>
+              <h1 className="serif mt-2 text-5xl text-[#101f4a]" data-testid="text-page-title">
+                {data.title}
+              </h1>
+              {data.summary && (
+                <p className="serif mt-4 border-l-4 border-[#f4c51b] pl-5 text-xl leading-relaxed text-stone-600">
+                  {data.summary}
+                </p>
+              )}
+              <div
+                className="prose prose-lg mt-8 max-w-none prose-headings:font-serif prose-headings:text-[#101f4a] prose-p:leading-[1.8] prose-p:text-stone-700"
+                data-testid="text-page-body"
+              >
+                {data.body.split(/\n{2,}/).map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+              </div>
+              <p className="mt-8 border-t border-[#e5e0d6] pt-4 text-xs text-stone-500">
+                Updated {dateLabel(data.updatedAt)}
+              </p>
+            </article>
+          ) : (
+            <Empty
+              title="Information not available"
+              detail="No published information is available for this page."
+            />
+          )}
+        </AsyncState>
+      </div>
+    </Shell>
+  );
+}
 
-function AboutPage(){const {data:settings}=useGetSiteSettings(); const {data}=useGetPage('about'); useMeta(data?.title||'About',data?.summary||'About Focus on Bong TV Network.'); return <Shell><div className="wrap max-w-[950px] py-10"><div className="grid gap-8 md:grid-cols-[.8fr_1.2fr] md:items-center"><div className="bg-[#101f4a] p-8 text-white"><img src="/brand-logo.jpg" alt="Focus on Bong TV Network official logo" className="mx-auto w-48 rounded-full" data-testid="img-about-logo"/><p className="serif mt-5 text-center text-2xl">{settings?.tagline||tagline}</p></div><div><div className="eyebrow">Our network</div><h1 className="serif mt-2 text-5xl text-[#101f4a]" data-testid="text-about-title">{data?.title||'About Focus on Bong TV Network'}</h1>{data?.summary?<p className="serif mt-4 text-xl leading-relaxed text-stone-600">{data.summary}</p>:<p className="mt-4 text-base leading-7 text-stone-700">{settings?.brandPromise||'A newsroom for Bong County, Liberia, Africa and the world.'}</p>}</div></div>{data?.body ? <div className="prose prose-lg mx-auto mt-9 max-w-3xl prose-headings:font-serif prose-headings:text-[#101f4a] prose-p:leading-8" data-testid="text-about-body">{data.body.split(/\n{2,}/).map((p,i)=><p key={i}>{p}</p>)}</div>:<div className="mt-9 border-t border-[#ddd7ca] pt-5 text-sm text-stone-600" data-testid="status-about-details">Additional network information will be added by the network.</div>}<div className="mt-8 bg-[#f1ede4] p-5"><p className="eyebrow">Contact</p><p className="mt-2 text-sm">{settings?.contactEmail || settings?.contactPhone ? <>{settings.contactEmail&&<span>{settings.contactEmail}</span>}{settings.contactEmail&&settings.contactPhone&&' · '}{settings.contactPhone&&<span>{settings.contactPhone}</span>}</>:'Contact details will be added by the network.'}</p>{settings?.socialLinks?.length ? <div className="mt-3 flex flex-wrap gap-3">{settings.socialLinks.map(s=><a key={s.url} href={s.url} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#101f4a] underline" data-testid={`link-social-${s.label.toLowerCase().replaceAll(' ','-')}`}>{s.label}<ArrowUpRight size={12} className="ml-1 inline"/></a>)}</div>:<p className="mt-2 text-xs text-stone-500">Social details will be added by the network.</p>}</div></div></Shell>; }
+function AboutPage() {
+  const { data: settings } = useGetSiteSettings();
+  const { data } = useGetPage('about');
+  const hasContactDetails = Boolean(settings?.contactEmail || settings?.contactPhone);
+  const socialLinks = settings?.socialLinks || [];
+  useMeta(data?.title || 'About', data?.summary || 'About Focus on Bong TV Network.');
+
+  return (
+    <Shell>
+      <div className="wrap max-w-[950px] py-10">
+        <div className="grid gap-8 md:grid-cols-[.8fr_1.2fr] md:items-center">
+          <div className="bg-[#101f4a] p-8 text-white">
+            <img
+              src="/brand-logo.jpg"
+              alt="Focus on Bong TV Network official logo"
+              className="mx-auto w-48 rounded-full"
+              data-testid="img-about-logo"
+            />
+            <p className="serif mt-5 text-center text-2xl">{settings?.tagline || tagline}</p>
+          </div>
+          <div>
+            <div className="eyebrow">Our network</div>
+            <h1 className="serif mt-2 text-5xl text-[#101f4a]" data-testid="text-about-title">
+              {data?.title || 'About Focus on Bong TV Network'}
+            </h1>
+            {data?.summary ? (
+              <p className="serif mt-4 text-xl leading-relaxed text-stone-600">{data.summary}</p>
+            ) : (
+              <p className="mt-4 text-base leading-7 text-stone-700">
+                {settings?.brandPromise || 'A newsroom for Bong County, Liberia, Africa and the world.'}
+              </p>
+            )}
+          </div>
+        </div>
+        {data?.body && (
+          <div
+            className="prose prose-lg mx-auto mt-9 max-w-3xl prose-headings:font-serif prose-headings:text-[#101f4a] prose-p:leading-8"
+            data-testid="text-about-body"
+          >
+            {data.body.split(/\n{2,}/).map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        )}
+        {(hasContactDetails || socialLinks.length > 0) && (
+          <div className="mt-8 bg-[#f1ede4] p-5">
+            <p className="eyebrow">Contact &amp; social</p>
+            {hasContactDetails && (
+              <p className="mt-2 text-sm">
+                {settings?.contactEmail && <span>{settings.contactEmail}</span>}
+                {settings?.contactEmail && settings?.contactPhone && ' · '}
+                {settings?.contactPhone && <span>{settings.contactPhone}</span>}
+              </p>
+            )}
+            {socialLinks.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-3">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.url}
+                    href={social.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-bold text-[#101f4a] underline"
+                    data-testid={`link-social-${social.label.toLowerCase().replaceAll(' ', '-')}`}
+                  >
+                    {social.label}
+                    <ArrowUpRight size={12} className="ml-1 inline" />
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Shell>
+  );
+}
 
 function UnsubscribePage(){const unsub=useUnsubscribeNewsletter(); const [email,setEmail]=useState('');const [message,setMessage]=useState('');useMeta('Unsubscribe','Manage your newsletter registration with Focus on Bong TV Network.');function go(e:FormEvent){e.preventDefault();unsub.mutate({data:{email}}, {onSuccess:r=>setMessage(r.message),onError:()=>setMessage('We could not process that request. Please try again.')});}return <Shell><div className="wrap max-w-[620px] py-16"><span className="eyebrow">Newsletter preferences</span><h1 className="serif mt-2 text-5xl text-[#101f4a]">Unsubscribe</h1><p className="mt-4 text-sm leading-6 text-stone-600">Enter your email address to remove it from the network’s newsletter interest list. Email delivery is not configured yet.</p><form onSubmit={go} className="mt-7 grid gap-3"><label className="text-xs font-bold text-[#101f4a]">Email address<input required type="email" value={email} onChange={e=>setEmail(e.target.value)} className="mt-1 block w-full border border-[#d8d2c6] bg-white p-3 font-normal" data-testid="input-unsubscribe-email"/></label><button className="btn w-fit" disabled={unsub.isPending} data-testid="button-unsubscribe">{unsub.isPending?'Updating…':'Unsubscribe'}</button>{message&&<p className="text-sm text-[#365c45]" role="status" data-testid="status-unsubscribe">{message}</p>}</form></div></Shell>;}
 

@@ -37,21 +37,27 @@ import {
 const router: IRouter = Router();
 
 function visibleArticleFilter(now = new Date()): SQL {
-  return or(
-    eq(articlesTable.status, "published"),
-    and(
-      eq(articlesTable.status, "scheduled"),
-      lte(articlesTable.publishedAt, now),
+  return and(
+    eq(articlesTable.isDemo, false),
+    or(
+      eq(articlesTable.status, "published"),
+      and(
+        eq(articlesTable.status, "scheduled"),
+        lte(articlesTable.publishedAt, now),
+      ),
     ),
   )!;
 }
 
 function visiblePageFilter(now = new Date()): SQL {
-  return or(
-    eq(contentPagesTable.status, "published"),
-    and(
-      eq(contentPagesTable.status, "scheduled"),
-      lte(contentPagesTable.updatedAt, now),
+  return and(
+    eq(contentPagesTable.isDemo, false),
+    or(
+      eq(contentPagesTable.status, "published"),
+      and(
+        eq(contentPagesTable.status, "scheduled"),
+        lte(contentPagesTable.updatedAt, now),
+      ),
     ),
   )!;
 }
@@ -338,6 +344,7 @@ router.get("/authors", async (_req, res): Promise<void> => {
         visibleArticleFilter(),
       ),
     )
+    .where(eq(authorsTable.isDemo, false))
     .groupBy(authorsTable.id)
     .orderBy(authorsTable.name);
 
@@ -374,7 +381,12 @@ router.get("/authors/:slug", async (req, res): Promise<void> => {
         visibleArticleFilter(),
       ),
     )
-    .where(eq(authorsTable.slug, params.data.slug))
+    .where(
+      and(
+        eq(authorsTable.slug, params.data.slug),
+        eq(authorsTable.isDemo, false),
+      ),
+    )
     .groupBy(authorsTable.id)
     .limit(1);
 
@@ -399,7 +411,10 @@ router.get("/videos", async (req, res): Promise<void> => {
   }
 
   const { q, category, page, pageSize } = parsed.data;
-  const filters: SQL[] = [eq(videosTable.status, "published")];
+  const filters: SQL[] = [
+    eq(videosTable.status, "published"),
+    eq(videosTable.isDemo, false),
+  ];
   if (category) filters.push(eq(videosTable.category, category));
   if (q) {
     const pattern = safeSearchPattern(q);
@@ -455,6 +470,7 @@ router.get("/videos/:slug", async (req, res): Promise<void> => {
       and(
         eq(videosTable.slug, params.data.slug),
         eq(videosTable.status, "published"),
+        eq(videosTable.isDemo, false),
       ),
     )
     .limit(1);
@@ -489,7 +505,7 @@ router.get("/live", async (_req, res): Promise<void> => {
       streamType: settings?.streamType ?? null,
       programTitle: settings?.programTitle ?? null,
       programDescription: settings?.programDescription ?? null,
-      schedule: settings?.schedule ?? [],
+      schedule: (settings?.schedule ?? []).filter((item) => !item.isDemo),
       alternativeLinks: settings?.alternativeLinks ?? [],
     }),
   );
@@ -511,6 +527,7 @@ router.get("/breaking-news", async (_req, res): Promise<void> => {
     .where(
       and(
         eq(breakingNewsTable.active, true),
+        eq(breakingNewsTable.isDemo, false),
         lte(breakingNewsTable.startsAt, now),
         or(isNull(breakingNewsTable.endsAt), gt(breakingNewsTable.endsAt, now)),
         or(isNull(breakingNewsTable.articleId), visibleArticleFilter(now)),
@@ -603,6 +620,7 @@ router.get("/search", async (req, res): Promise<void> => {
     .where(
       and(
         eq(videosTable.status, "published"),
+        eq(videosTable.isDemo, false),
         or(
           ilike(videosTable.title, pattern),
           ilike(videosTable.description, pattern),
@@ -673,11 +691,19 @@ router.get("/sitemap.xml", async (req, res): Promise<void> => {
       .orderBy(desc(articlesTable.publishedAt))
       .limit(10000),
     db.select({ slug: categoriesTable.slug }).from(categoriesTable),
-    db.select({ slug: authorsTable.slug }).from(authorsTable),
+    db
+      .select({ slug: authorsTable.slug })
+      .from(authorsTable)
+      .where(eq(authorsTable.isDemo, false)),
     db
       .select({ slug: videosTable.slug, updatedAt: videosTable.updatedAt })
       .from(videosTable)
-      .where(eq(videosTable.status, "published"))
+      .where(
+        and(
+          eq(videosTable.status, "published"),
+          eq(videosTable.isDemo, false),
+        ),
+      )
       .orderBy(desc(videosTable.publishedAt))
       .limit(10000),
   ]);
