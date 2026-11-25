@@ -59,7 +59,9 @@ function Header() {
   const [open, setOpen] = useState(false);
   const [path] = useLocation();
   const { data: breaking } = useListBreakingNews();
-  const headline = breaking?.find((item) => !item.endsAt || new Date(item.endsAt) > new Date());
+  const headline = Array.isArray(breaking)
+    ? breaking.find((item) => !item.endsAt || new Date(item.endsAt) > new Date())
+    : undefined;
   return <>
     <div className="topline"><div className="wrap flex min-h-9 items-center justify-between gap-4"><span className="hidden sm:block" data-testid="text-tagline">{tagline}</span><span className="sm:hidden">Bong County · Liberia · The world</span><Link href="/live" className="flex items-center gap-2 font-bold tracking-[.12em] text-white" data-testid="link-live-top"><span className="h-2 w-2 rounded-full bg-[#f4c51b]"/> CHECK LIVE STATUS</Link></div></div>
     <header className="masthead">
@@ -113,8 +115,11 @@ function Home() {
   const { data: cats } = useListCategories();
   const { data: videos } = useListVideos({ page: 1, pageSize: 3 });
   const { data: settings } = useGetSiteSettings();
-  const items = data?.items?.filter((article) => !article.isDemo) || [];
-  const lead = featured?.items?.find((article) => !article.isDemo) || items[0];
+  const items = Array.isArray(data?.items)
+    ? data.items.filter((article) => !article.isDemo)
+    : [];
+  const featuredItems = Array.isArray(featured?.items) ? featured.items : [];
+  const lead = featuredItems.find((article) => !article.isDemo) || items[0];
   const rest = items.filter(x => x.id !== lead?.id).slice(0, 4);
   return <Shell><div className="wrap">
     <div className="flex items-center justify-between border-b border-[#e2ddd2] py-3 text-[10px] font-bold uppercase tracking-[.16em] text-[#6b6b65]"><span>Independent reporting · Bong County, Liberia</span><span className="hidden sm:block">Stories for our place in the world</span></div>
@@ -122,11 +127,11 @@ function Home() {
       <AsyncState loading={isLoading} error={isError} label="headlines">{lead ? <ArticleCard article={lead} feature/> : <div className="paper-card p-8"><span className="eyebrow">The newsroom</span><h1 className="serif mt-4 text-5xl leading-[1.05] text-[#101f4a] md:text-7xl">Local stories.<br/>A wider world.</h1><p className="mt-5 max-w-lg text-sm leading-7 text-stone-600">{settings?.brandPromise || tagline}</p><Link href="/latest-news" className="btn mt-6" data-testid="link-home-latest">Explore the newsroom <ArrowRight size={15}/></Link></div>}</AsyncState>
       <div className="flex flex-col gap-5">{rest.slice(0,3).map((a,i)=><Link key={a.id} href={`/article/${a.slug}`} className="group grid grid-cols-[104px_1fr] gap-4 border-b border-[#ded9cf] pb-4" data-testid={`link-home-story-${a.id}`}><div className="img-frame aspect-square">{a.imageUrl && <img src={a.imageUrl} alt={a.imageAlt} className="h-full w-full object-cover"/>}</div><div><span className="eyebrow">{a.categoryName}</span><h2 className="serif mt-1 text-xl font-semibold leading-tight text-[#101f4a] group-hover:text-[#c90018]">{a.title}</h2><p className="mt-2 text-[10px] text-stone-500">{dateLabel(a.publishedAt)} {a.isDemo && <span className="ml-1 font-bold text-[#9a7300]">· SAMPLE</span>}</p></div></Link>)}<Link href="/latest-news" className="mt-auto flex items-center justify-between bg-[#101f4a] p-4 text-white" data-testid="link-latest-brief"><span><span className="eyebrow !text-[#f4c51b]">Stay informed</span><span className="serif mt-1 block text-xl">All the latest reporting</span></span><ArrowUpRight size={20}/></Link></div>
     </section>
-    {cats && cats.length > 0 && <section className="border-y border-[#ded9cf] py-5" data-testid="section-categories"><div className="flex flex-wrap items-center gap-x-5 gap-y-3"><span className="eyebrow mr-2">Browse by</span>{cats.map(c=><Link href={`/category/${c.slug}`} key={c.slug} className="text-xs font-bold text-[#101f4a] hover:text-[#c90018]" data-testid={`link-category-${c.slug}`}>{c.name}</Link>)}</div></section>}
+    {Array.isArray(cats) && cats.length > 0 && <section className="border-y border-[#ded9cf] py-5" data-testid="section-categories"><div className="flex flex-wrap items-center gap-x-5 gap-y-3"><span className="eyebrow mr-2">Browse by</span>{cats.map(c=><Link href={`/category/${c.slug}`} key={c.slug} className="text-xs font-bold text-[#101f4a] hover:text-[#c90018]" data-testid={`link-category-${c.slug}`}>{c.name}</Link>)}</div></section>}
     <LatestLiberiaNews />
     <section className="py-11"><SectionTitle overline="From the newsroom" title="Latest reporting" href="/latest-news"/><AsyncState loading={isLoading} error={isError} label="articles">{items.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{items.slice(0,6).map(a=><ArticleCard key={a.id} article={a}/>)}</div> : <Empty title="No stories published yet" detail="New reporting will appear here when it is available."/>}</AsyncState></section>
     <section className="mb-12 grid items-center gap-5 bg-[#101f4a] p-6 text-white md:grid-cols-[1fr_auto] md:p-9"><div><span className="eyebrow !text-[#f4c51b]">Focus on Bong TV</span><h2 className="serif mt-2 text-3xl md:text-4xl">{settings?.tagline || tagline}</h2><p className="mt-2 max-w-xl text-sm leading-6 text-white/65">News and stories rooted in Bong County, with a view toward Liberia, Africa and the world.</p></div><Link className="btn !bg-[#f4c51b] !text-[#101f4a]" href="/about" data-testid="link-about-network">About the network <ArrowRight size={15}/></Link></section>
-    <section className="pb-12"><SectionTitle overline="Watch" title="On Focus" href="/videos"/>{videos?.items?.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{videos.items.map(v=><VideoCard key={v.id} video={v}/>)}</div> : <Empty title="No videos available" detail="Published video coverage will appear here."/ >}</section>
+    <section className="pb-12"><SectionTitle overline="Watch" title="On Focus" href="/videos"/>{Array.isArray(videos?.items) && videos.items.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{videos.items.map(v=><VideoCard key={v.id} video={v}/>)}</div> : <Empty title="No videos available" detail="Published video coverage will appear here."/ >}</section>
   </div></Shell>;
 }
 function Empty({ title, detail }: { title: string; detail: string }) { return <div className="paper-card px-6 py-12 text-center" data-testid="status-empty"><span className="eyebrow">The newsroom</span><h3 className="serif mt-2 text-2xl text-[#101f4a]">{title}</h3><p className="mt-2 text-sm text-stone-600">{detail}</p></div>; }
