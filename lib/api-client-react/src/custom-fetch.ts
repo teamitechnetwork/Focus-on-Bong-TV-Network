@@ -78,6 +78,14 @@ function resolveUrl(input: RequestInfo | URL): string {
   return input.url;
 }
 
+function isApiRequestUrl(url: string): boolean {
+  try {
+    return new URL(url, "http://localhost").pathname.startsWith("/api/");
+  } catch {
+    return false;
+  }
+}
+
 function mergeHeaders(...sources: Array<HeadersInit | undefined>): Headers {
   const headers = new Headers();
 
@@ -326,6 +334,8 @@ export async function customFetch<T = unknown>(
   input: RequestInfo | URL,
   options: CustomFetchOptions = {},
 ): Promise<T> {
+  const requestUrl = resolveUrl(input);
+  const isApiRequest = isApiRequestUrl(requestUrl);
   input = applyBaseUrl(input);
   const { responseType = "auto", headers: headersInit, ...init } = options;
 
@@ -361,6 +371,16 @@ export async function customFetch<T = unknown>(
   const requestInfo = { method, url: resolveUrl(input) };
 
   const response = await fetch(input, { ...init, method, headers });
+
+  if (
+    response.ok &&
+    isApiRequest &&
+    getMediaType(response.headers) === "text/html"
+  ) {
+    throw new TypeError(
+      "The API returned an HTML page instead of JSON. Check that VITE_API_BASE_URL points to the API server.",
+    );
+  }
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
